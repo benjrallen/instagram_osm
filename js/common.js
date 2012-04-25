@@ -389,7 +389,7 @@
 
 	function makeWhereZip( lat, lng ){
 		return '<div lat="'+lat+'" lng="'+lng+'" class="where">'+
-					'<span class="title">Where I Zip</span>'+
+					'<span class="title">Where I was:</span>'+
 					'<span class="location"></span>'+
 				'</div>';
 	}
