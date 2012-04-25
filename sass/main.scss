@@ -1,0 +1,704 @@
+@import 'partials/base';
+@import 'partials/typography';
+@import 'partials/leaflet';
+
+/* 
+
+Zipstagram Styles 1.0
+Author: Michael J. Champlin
+URL: http://mjchamplin.com
+
+*/
+
+/*	Resets  */
+
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figure,figcaption,hgroup,menu,header,footer,nav,section,summary,time,mark,audio,video{margin:0;padding:0;border:0}article,aside,canvas,figure,figure img,figcaption,hgroup,footer,header,nav,section,audio,video{display:block}a img{border:0}figure{position:relative}figure img{width:100%}
+
+
+html { height: 100%;}
+body { background: black; height: 100%; min-width: 600px; font-family: Helvetica, Arial, sans-serif; }
+
+
+#container {
+	height: 100%;
+	width: 100%;
+	
+}
+
+.line{
+	margin-left: -1px;
+	width: 1px;
+	height: 100%;
+	@include inline-block;
+	vertical-align: middle;
+}
+
+
+$header-height: 60px;
+$header-bord: 5px;
+#header{
+	position: fixed;
+	top: 0;
+	right: 0;
+	z-index: 3;
+	width: 100%;
+	height: $header-height;
+	border-bottom: $header-bord solid $base-green;
+	background-color: $base-white;
+	font-family: DINFamily, sans-serif;
+	
+	
+	& h1{
+		@include adjust-font-size-to( 32px );
+		//margin: 10px 0 0 30px;
+		height: 100%;
+		font-weight: normal;
+		margin-left: 1em;
+		//font-family: "Helvetica", "Arial", sans-serif;
+		color: $base-color;
+		line-height: $header-height;
+		
+		& span{
+			@include inline-block;
+		}
+	}
+
+	& .right{
+		height: 100%;
+		position: absolute;
+		right: 0;
+		top: 0;
+		
+		& .line, & #nav{
+			@include inline-block;
+			vertical-align: middle;
+		}
+				
+		& #nav{
+			@include adjust-font-size-to( 14px, 1 );
+			text-transform: lowercase;
+			padding-right: 4em;
+
+			& span{
+				@include inline-block;
+			
+				&.view{
+					color: $base-green;
+					padding-right: 6px;
+					font-weight: bold;
+				}
+				&.current{
+					border-right: 1px solid $base-color;
+					padding-right: 6px;
+				}
+				&.hashtag{
+					padding-left: 6px;
+					color: $base-green;
+					position: relative;
+					font-weight: bold;
+					cursor: pointer;
+					cursor: hand;
+					margin-bottom: -1px;
+					
+					$selectRad: 6px;
+					& #hashSelect{
+						@include adjust-font-size-to( 12px, 1.25 );
+						background: $base-white;
+						display: none;
+						font-weight: normal;
+						right: 0;
+						top: 2em;
+						@include pie;
+						position: absolute;
+						@include border-radius( 0 0 $selectRad $selectRad );
+						@include box-shadow( #000 0 2px 6px -3px );
+						padding-left: 1em;
+						padding-right: 1em;						
+						color: $base-orange;
+						
+						& div{
+							@include padding-leader(0.25);
+							@include padding-trailer(0.25);
+							cursor: pointer;
+							cursor: hand;
+							
+							&:hover{
+								color: darken( $base-orange, 20%);
+							}
+						}
+					}
+					
+					& .text{}
+					& .icon{
+						@include main-sprite;
+						background-position: 0 -260px;
+						height: 11px;
+						width: 11px;
+						margin-left: 3px;
+						margin-bottom: 1px;
+					}
+				}
+			}
+		}
+	}
+}
+
+$logo-height: 162px;
+$logo-width: 162px + 12px;
+$logo-left: 8px;
+$big-height: 133px;
+$big-width: 133px;
+$small-height: 75px;
+$small-width: 75px;
+$nav-width: 50px;
+$icon-height: 25px;
+$icon-width: 25px;
+$cont-padd: 6px;
+$trans-time: 0.3s;
+$pic-right: 9px;
+$img-bord: 1px;
+$img-color: lighten( $base-grey, 40% );
+
+.clone{
+	position: fixed;
+	z-index: 2000;
+	cursor: pointer;
+	cursor: hand;
+	
+	& img{
+		border: $img-bord solid $img-color;
+		display: block;
+		height: 100%;
+		width: auto;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+}
+
+
+#footer-wrap{
+	position: fixed; 
+	bottom: 0; 
+	left: 0;
+	width: 100%; 
+	z-index: 3; 
+		
+	& #subfooter{
+		//background: #bad;
+		position: relative;
+		z-index: 2;
+		height: $big-height + $img-bord * 2;
+		margin-bottom: -( floor( ( $big-height - $img-bord * 2 - $small-height - $cont-padd*2 ) / 2 ) ) + $cont-padd;
+
+		& #carousel-logo { 
+			position: absolute;
+			z-index: 3;
+			top: 0;
+			right: 0;
+			width: $logo-width;
+			height: $logo-height;
+			@include main-sprite;
+			background-position: 0 0;
+		}
+
+		& #carousel{
+			height: $big-height + $img-bord * 2;
+			position: absolute;
+			z-index: 2;
+			top: 0;
+			left: 0;
+			width: 100%;
+			
+			& #carousel-bg{
+				height: $small-height + $cont-padd * 2;
+				position: absolute;
+				top: floor( ( $big-height + $img-bord * 2 - ( $small-height + $cont-padd * 2) ) / 2);
+				width: 100%;
+				z-index: 1;
+				
+				& #bg-inner{
+					background: $base-grey;
+					@include opacity( 0.55 );
+					height: 100%;
+					margin: 0 $cont-padd;
+				}
+			}
+			& #carousel-wrap{
+				height: $big-height + $img-bord * 2;
+				position: relative;
+				z-index: 2;
+				//background: #bada55;
+				//@include opacity( 0.1 );
+				margin-right: $logo-width + $logo-left;
+				
+				& .nav{
+					//height: 100%;
+					height: $small-height + $cont-padd * 2;
+					top: floor( ( ($big-height + $img-bord * 2) - ( $small-height + $cont-padd * 2 ) ) / 2 );
+					width: $nav-width;
+					text-align: center;
+					//background: lighten( red, 40% );
+					position: absolute;
+					cursor: pointer;
+					cursor: hand;
+					
+					& .icon{
+						@include main-sprite;
+						@include inline-block;
+						vertical-align: middle;
+						height: $icon-height;
+						width: $icon-width;
+					}
+					&.next{
+						right: 0;
+						& .icon{
+							background-position: -30px -330px;
+						}
+
+						&:hover{
+							& .icon{
+								background-position: -30px -360px;
+							}
+						}
+					}
+					&.prev{
+						left: 0;
+						& .icon{
+							background-position: 0 -330px;
+						}
+
+						&:hover{
+							& .icon{
+								background-position: 0 -360px;
+							}
+						}
+					}
+				}
+				
+				& #carousel-inner{
+					height: $big-height + $img-bord * 2;
+					margin-left: $nav-width;
+					margin-right: $nav-width;
+					position: relative;
+					overflow: hidden;
+					//background: #badaff;
+					
+					& #carousel-images{
+						//padding-left: $nav-width;
+						position: absolute;
+						top: floor( ($big-height - $small-height) / 2 );
+						left: 0;
+						height: $small-height;
+						width: 999999em;
+						//background: darken( #badaff, 20% );
+						@include single-transition( left, $trans-time, ease-in-out );
+						
+						& .pic{
+							height: $small-height;
+							width: $small-width;
+							position: relative;
+							@include float-left;
+							display: block;
+							z-index: 1;
+							margin-right: $pic-right;
+							cursor: pointer;
+							cursor: hand;
+							
+							& img{
+								position: absolute;
+								top: 0;
+								left: 0;
+								display: block;
+								border: $img-bord solid $img-color;
+								height: $small-height;
+								width: $small-width;
+								
+								@include single-transition( all, $trans-time, ease-in-out );
+							}
+							
+							&:hover{
+								z-index: 2;
+							}
+							
+							&.over{
+								z-index: 2;
+								
+								& img{
+									height: $big-height;
+									width: $big-width;
+									top: -1 * floor( ($big-height - $small-height) / 2 );
+									left: -1 * floor( ($big-width - $small-width) / 2 );
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	
+	& #footer{
+		position: relative;
+		border-top: 1px solid #888; 
+		background-color: #565a5c; 
+		//background-color: #badaff;
+		//height: 70px;
+		z-index: 1;
+		text-align: center;
+		
+		& #brand{
+			display: block;
+			@include main-sprite;
+			background-position: -300px 0;
+			height: 44px;
+			width: 124px;
+			position: absolute;
+			left: 8px;
+			bottom: 4px;
+			@include opacity( 0.8 );
+			text-indent: -9999em;
+			
+			&:hover{
+				@include opacity(1);
+			}
+		}
+		
+		& .sm{
+			//@include padding-leader;
+			//@include padding-trailer;
+			padding: 12px 0 9px;
+			
+			& .fb-like, & .twitter-share-button{
+				@include inline-block;
+				vertical-align: middle;
+			}
+			.twitter-share-button{
+				text-indent: -9999em;
+			}
+		}
+		
+		& .links{
+			$a-padd: 9px;
+			@include padding-trailer();
+			& a{
+				//color: $base-orange;
+				color: lighten( $base-grey, 40% );
+				text-decoration: none;
+				font-weight: 800;
+				@include adjust-font-size-to( 15px, 1 );
+				padding-right: $a-padd;
+				padding-left: $a-padd;
+				border-right: 2px solid lighten( $base-grey, 40% );
+				
+				&#play-along{
+					border-right: none;
+				}
+				
+				&:hover{
+					text-decoration: underline;
+				}
+			}
+		}
+		& .copy{
+			color: lighten( $base-grey, 40% );
+			font-weight: 800;
+			@include adjust-font-size-to(10px);
+		}
+	}
+}
+
+#play-along{
+	border-right: none;
+}
+
+
+#map{
+	height: 100%;
+	width: 100%;
+	position: relative;
+	z-index: 1;
+}
+
+
+#popunder, #modalunder{
+	background: rgba( 153, 153, 153, 0.4 );
+	display: block;
+	//@include opacity(0.2);
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	display: none;
+	background-image: url('../images/bg.png');
+	
+ 	.lte8 &{
+		-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#66999999,endColorstr=#66999999)"; /* IE8 */
+		    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#66999999,endColorstr=#66999999);   /* IE6 & 7 */
+		      zoom: 1;
+	}
+}
+#popup, #modal{
+	z-index: 0;
+	@include pie;
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: none;
+	background: $base-white;
+	@include inline-block;
+	padding: 16px 12px;
+	@include border-radius( 12px );
+	@include box-shadow( #000 0 6px 24px 0px );
+	
+	$nav-height: 25px;
+	$nav-width: 25px;
+	$nav-spacing: 12px;
+	& .nav{
+		position: absolute;
+		top: 0;
+		height: 100%;
+		width: $nav-width;
+		
+		&.next{
+			right: -( $nav-spacing + $nav-width );
+			& .icon{
+				background-position: -30px -330px;
+			}
+			
+			&:hover{
+				& .icon{
+					background-position: -30px -360px;
+				}
+			}
+		}
+		&.prev{
+			left: -( $nav-spacing + $nav-width );
+			& .icon{
+				background-position: 0 -330px;
+			}
+			
+			&:hover{
+				& .icon{
+					background-position: 0 -360px;
+				}
+			}
+		}
+		
+		& .icon{
+			
+			@include main-sprite;
+			@include inline-block;
+			vertical-align: middle;
+			position: absolute;
+			top: 50%;
+			left: 0;
+			margin-top: -1 * floor( $nav-height / 2);
+			width: $nav-width;
+			height: $nav-height;
+		}
+	}
+	& .nav, & .close{
+		cursor: pointer;
+		cursor: hand;
+	}
+	& .close{
+		@include main-sprite;
+		@include inline-block;
+		height: 10px;
+		width: 10px;
+		background-position: 0 -290px;
+		position: absolute;
+		top: 1em;
+		right: 1em;
+		
+		&:hover{
+			background-position: -15px -290px;
+		}
+	}
+}
+
+#modal{
+	display: block;
+}
+
+.insta-wrap{
+	padding-left: 1em;
+	padding-right: 1em;
+	@include adjust-font-size-to( 14px );
+	
+	& .pic, & .info{
+		@include inline-block;
+		vertical-align: middle;
+	}
+	& .pic{
+		width: 260px;
+		height: 260px;
+		margin-right: 1.5em;
+		
+		& img{
+			display: block;
+			width: 100%;
+			height: auto;
+		}
+	}
+	
+	& .info{
+		width: 260px;
+
+		@include padding-leader(2);
+		@include padding-trailer(2);
+
+		& .user{
+			@include padding-trailer();
+			
+			& span{
+				@include inline-block;
+				
+				&.user-pic{
+					max-width: 42px;
+					margin-right: 1em;
+					
+					& img{
+						display: block;
+						width: 100%;
+						height: auto;
+					}
+				}
+				&.user-name{
+					color: $base-orange;
+					font-weight: 600;
+				}
+			}
+		}
+		
+		& .description{
+			font-style: italic;
+			@include padding-trailer(2);
+			@include adjust-font-size-to( 12px, 1.25 );
+			& .tag{
+				color: $base-green;
+			}
+		}
+		
+		& .where{
+			//display: none;
+			
+			& span{
+				@include inline-block;
+				vertical-align: baseline;
+				
+				&.title{
+					text-transform: uppercase;
+					//font-family: DINFamily, sans-serif;
+					font-weight: bold;
+					color: $base-green;
+					@include adjust-font-size-to( 11px );
+				}
+				&.location{
+					padding-left: 6px;
+					//font-weight: bold;
+					@include adjust-font-size-to( 12px );
+				}
+			}
+		}
+	}
+	
+	&.modal-wrap{
+		width: 500px;
+		text-align: center;
+		padding-left: 20px;
+		padding-left: 20px;
+		@include padding-leader(0.5);
+		
+		& h2{
+			color: $base-green;
+			@include adjust-font-size-to( 20px, 1.25 );
+			//font-weight: 500;
+		}
+		& h3{
+			@include margin-leader(0.5);
+			color: $base-orange;
+			@include adjust-font-size-to( 14px, 1.25 );
+			@include padding-trailer;
+		}
+		& .content{
+			@include adjust-font-size-to( 12px, 1 );
+			@include padding-trailer;
+			//color: $base-grey;
+			& strong{
+				display: block;
+			}
+			& p{
+				font-weight: 500;
+			}
+		}
+		
+		$button-height: 36px;
+		$button-font-size: 18px;
+		$button-padd: 16px;
+		& button{
+			font-family: DINFamily, sans-serif;
+			color: $base-white;
+			background: $base-orange;
+			@include background(
+				linear-gradient( top, lighten( $base-orange, 10% ) 0%, $base-orange 100% )
+			);
+			font-weight: bold;
+			padding-left: $button-padd;
+			padding-right: $button-padd;
+			font-size: $button-font-size;
+			height: $button-height;
+			line-height: $button-height - 2px;
+			//border: 1px solid lighten( $base-grey, 10% );
+			border: none;
+			@include border-radius( 4px );
+			cursor: pointer;
+			cursor: hand;
+			@include text-shadow( $base-grey 0 -1px 0 );
+			@include box-shadow(
+				inset lighten($base-orange, 20%) 0 1px 2px 0,
+				lighten($base-grey, 20%) 0 -1px 0 0,
+				lighten($base-grey, 20%) 0 0 6px -1px
+			);
+			
+			&:hover{
+				background: darken( $base-orange, 5% );
+			}
+		}
+	}
+}
+
+.lte8{
+	& .insta-wrap{
+		&.modal-wrap{
+			& button{
+				border: 1px solid lighten( $base-grey, 20% );
+				behavior: none;
+				background: $base-orange;
+				&:hover{
+					background: darken( $base-orange, 5% );
+				}
+			}
+		}
+	}
+}
+
+.leaflet-top {
+	top: $header-height + $header-bord;
+}
+
+.clearfix, .clear{
+	@include pie-clearfix;
+}
+
+#hashtag-json{
+	display: none;
+}
+#modal-content{
+	position: absolute;
+	top: -9999em;
+}
