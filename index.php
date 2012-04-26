@@ -10,6 +10,10 @@
   
   <script type="text/javascript" src="js/modernizr.js"></script>
   <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28492745-1']);
+    _gaq.push(['_trackPageview']);
+
     Modernizr.load([
       { load: ['//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'],
     	  complete: function(){ if(!window.jQuery){ Modernizr.load('js/jquery.js'); } }
@@ -21,7 +25,8 @@
     	{ load: 'js/common.js' },
     	<?php */ ?>
     	<?php /* concatenate and optimize seperate script files for deployment using google closure compiler (compiler.jar) in js folder */ ?>
-    	{ load : 'js/theme.js' }
+    	{ load : 'js/theme.js' },
+      { load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js' }
     ]);
   </script>
 	  	<link rel="stylesheet" href="css/main.css" />
