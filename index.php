@@ -103,6 +103,7 @@
 </div>
 
 <div id="hashtag-json"><?php include 'cache/hashtags.json'; ?></div>
+<div id="cache-version" style="display:none;"><?php include 'cache/instahash_cache_version_number.json'; ?></div>
 <div id="modal-content">
   <article class="insta-wrap modal-wrap">
     <h2>hi.  this is an <br />instagram + open street maps mashup</h2>

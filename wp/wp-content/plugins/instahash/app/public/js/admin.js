@@ -2,25 +2,29 @@ var Ease = Ease || {};
 
 (function($){
 	
-	Ease.cache_folder = '../cache/';
-	Ease.cache_all = 'instahash_all.json';
+	//Ease.cache_folder = '../cache/';
+	//Ease.cache_all = 'instahash_all.json';
 	Ease.wp_url = window.location.protocol+'//'+window.location.host + userSettings.url
-	Ease.cache_path =  Ease.wp_url + Ease.cache_folder + Ease.cache_all;
+	//Ease.cache_path =  Ease.wp_url + Ease.cache_folder + Ease.cache_all;
 	
 	Ease.Autosearch = function(){
-		console.log( Ease.cache_path );
+		//console.log( Ease.cache_path );
 		
 		this.data = null;
 		this.$form = null;
 		this.$input = null;
 		this.$button = null;
 		
+		//cache the responses
+		this.cache = {};
+		//track the xhr call
+		this.lastXhr = null;
 		
 		var that = this;
 		
-		return $.getJSON( Ease.cache_path, function( data, status, obj){
+		//return $.getJSON( Ease.cache_path, function( data, status, obj){
 			return that.init.apply( that, arguments );
-		});
+		//});
 		
 	};
 	
@@ -31,7 +35,7 @@ var Ease = Ease || {};
 		if( !this.$form.length )
 			return false;
 		
-		this.data = this.processData( data );
+		//this.data = this.processData( data );
 		
 		this.$input = this.$form.find('[name="q"]');
 		this.$button = this.$form.find('[type="submit"]');
@@ -46,9 +50,46 @@ var Ease = Ease || {};
 		
 		var that = this;
 		
+		// this.$input.autocomplete({
+		// 	minLength: 1,
+		// 	source: this.data,
+		// 	select: function( event, ui ){
+		// 		//console.log( 'SELECT', $(this), event, ui );
+		// 		
+		// 		window.location.href = that.getEditPath( ui.item.value );
+		// 		
+		// 		return false;
+		// 	}
+		// })
+		// .data( "autocomplete" )._renderItem = this.renderItem;
+
 		this.$input.autocomplete({
 			minLength: 1,
-			source: this.data,
+			source: function( request, response ) {
+				var term = request.term;
+				
+				if ( term in that.cache ) {
+					response( that.cache[ term ] );
+					return;
+				}
+
+				var requestVars = {
+					action: 'admin_pictures_admin_picture_search',
+					term: term
+				};
+
+				that.lastXhr = $.getJSON( ajaxurl, requestVars, function( data, status, xhr ) {
+					//console.log( 'gotten', data, status, xhr)
+					
+					data = that.processData( data );
+					
+					that.cache[ term ] = data;
+					if ( xhr === that.lastXhr ) {
+						response( data );
+					}
+				});
+
+			},
 			select: function( event, ui ){
 				//console.log( 'SELECT', $(this), event, ui );
 				
@@ -58,8 +99,9 @@ var Ease = Ease || {};
 			}
 		})
 		.data( "autocomplete" )._renderItem = this.renderItem;
+
 		
-		console.log('init!', this.data, this.$form, this.$input, this.$button );
+		//console.log('init!', this.data, this.$form, this.$input, this.$button );
 
 	};
 	
@@ -98,7 +140,7 @@ var Ease = Ease || {};
 				label = json.user.username+': '+(json.caption && json.caption.text ? json.caption.text : '')+' - '+json.id
 				//label = json.user.username+': '+json.caption.text+' - '+json.tags.join(', ')+'; '+json.id
 			
-			console.log( json );
+			//console.log( json );
 			
 			processed.push({
 				value: this.id,
@@ -123,3 +165,30 @@ var Ease = Ease || {};
 })(jQuery);
 
 
+//admin_surveys
+
+/*
+var postVars = {
+	action: this.controller+'_edit_json',
+	data: {}
+};
+
+//set the model info
+postVars.data[this.model] = this.data;
+
+//console.log( 'postVars', postVars );
+if( this.data.id ){
+	//set up paths
+	postVars.id = this.data.id;
+} else {
+	//set up paths
+	delete this.data.id;
+	postVars.action = this.controller+'_add_json';
+}
+
+var that = this;
+
+$.post( ajaxurl, postVars, function(data, status, obj){
+	that.saveCallback.apply( that, arguments );
+});
+*/

@@ -13,7 +13,8 @@
 		carousel = null;
 		pic_popup = new Popup( 'popup', 'popunder' ),
 		modal_popup = new Popup( 'modal', 'modalunder', true ),
-		cachePath = 'cache/';
+		cachePath = 'cache/',
+		cacheVersion = 0;		
 	
 	//an object for the carousel image heights... match to the sass variables
 	var img = {
@@ -39,6 +40,8 @@
 		//test for css transitions
 		hasTransitions = ( $('html.csstransitions').length ? true : false );
 		
+		cacheVersion = $('#cache-version').text();
+
 		//create the hashtag select list
 		makeHashtagList();
 		//make the carousel
@@ -95,14 +98,14 @@
 	function carouselNext(e){
 		//console.log( 'CAROUSEL NEXT', carousel.children().eq( 0 ).position().left, carouselLeft );
 		if( currentImgIndex < currentData.length ){
-			currentImgIndex++;
+			currentImgIndex = currentImgIndex + 3;
 			moveCarousel();
 		}
 		
 	}
 	function carouselPrev(e){
 		if( currentImgIndex > 0 ){
-			currentImgIndex--;
+			currentImgIndex = currentImgIndex - 3;
 			moveCarousel();
 		}
 		
@@ -111,16 +114,20 @@
 //currentImgIndex
 
 	function moveCarousel(){
-		currentLeft = -1 * carousel.children().eq( currentImgIndex ).position().left + carouselLeft;
-		//console.log('MOVE CAROUSEL', currentLeft);
-		$('.clone').trigger('mouseout');
+		var el = carousel.children().eq( currentImgIndex );
+		
+		if( el.length ){
+			currentLeft = -1 * el.position().left + carouselLeft;
+			console.log('MOVE CAROUSEL', currentLeft);
+			$('.clone').trigger('mouseout');
 
-		if( hasTransitions ){
-			carousel.css({ left: currentLeft });
-		} else {
-			carousel.stop( false, false ).animate({
-				left: left
-			}, img.time);
+			if( hasTransitions ){
+				carousel.css({ left: currentLeft });
+			} else {
+				carousel.stop( false, false ).animate({
+					left: left
+				}, img.time);
+			}
 		}
 	}
 
@@ -244,9 +251,12 @@
 
 	function resetCarousel(){
 		//console.log('RESET CAROUSEL');
+
+		currentLeft = 0; //updated in moveCarousel
+		currentImgIndex = 0; //used for the carousel
 		
 		$('.clone').remove();
-		carousel.html('');
+		carousel.html('').css({ left: carouselLeft });
 	}
 
 	function makeCarouselImage( data ){
@@ -288,12 +298,13 @@
 		});
 
 		//var alldata = null;
-
-		var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/cfc96afd35bc4c12b3f06893fff79e8c/60666/256/{z}/{x}/{y}.png',
+		//var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/cfc96afd35bc4c12b3f06893fff79e8c/60666/256/{z}/{x}/{y}.png',
+		var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/cfc96afd35bc4c12b3f06893fff79e8c/61923/256/{z}/{x}/{y}.png',
 			cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 12});
 
 
-		map.setView(new L.LatLng(46, -52), 3).addLayer(cloudmade);
+		//map.setView(new L.LatLng(46, -52), 3).addLayer(cloudmade);
+		map.setView(new L.LatLng(38.822591, -97.613525), 3).addLayer(cloudmade);
 
 		//load the first hashtag in the list
 		var hash = hashSelect.children().first().attr('hash')
@@ -306,7 +317,7 @@
 
 	function loadMapData( hashName ){
 		
-		$.getJSON( cachePath+hashName+'.json', function( data ){
+		$.getJSON( cachePath+hashName+'.json?'+cacheVersion, function( data ){
 			currentData = [];
 			
 			resetCarousel();
@@ -319,8 +330,8 @@
 						
 						return new L.CircleMarker(latlng, {
 							radius: 2,
-							fillColor: "#fecb00",
-							color: "#fecb00",
+							//fillColor: "#fecb00",
+							//color: "#fecb00",
 							weight: 1,
 							opacity: 1,
 							fillOpacity: 0.9
@@ -337,8 +348,14 @@
 									3 : e.properties.likes < 50 ? 
 											6 : 11 );
 
+					var stroke = ( e.properties.likes < 10 ?
+										'#D8B426' : e.properties.likes < 50 ? 
+												'#E5BC19' : '#F1C30D' );
+												
+					var fill = ( e.properties.likes < 10 ?
+										'#E5BC19' : e.properties.likes < 50 ? 
+												'#F1C30D' : '#fecb00' );
 					//console.log(e.properties.likes, size);
-
 					
 					currentData.push({
 						id: e.properties.id,
@@ -347,9 +364,15 @@
 					
 					e.layer.setRadius( size );
 					
+					e.layer.setStyle({
+						color: stroke,
+						fillColor: fill
+					});
+					
 					var block = makeBlockContent(e.properties);
 					
 					e.layer.bindPopup( block, { autoPan: false });
+					//e.layer.bindPopup( block, { autoPan: true });
 					
 					//put it in the carousel
 					makeCarouselImage( e.properties );
@@ -362,6 +385,10 @@
 
 			} else {
 			}
+			
+			//console.log( 'data', data );
+			//reverse the data to get newer stuff
+			data.features = data.features.reverse()
 			
 			geoJsonLayer.clearLayers();
 			geoJsonLayer.addGeoJSON( data );
@@ -380,16 +407,16 @@
 							'<div class="description">'+
 								data.description+
 							'</div>'+
-							makeWhereZip( data.latitude, data.longitude )+
+							makeWhere( data.latitude, data.longitude )+
 						'</div>'+
 					'</div>';
 		
 		return block;
 	}
 
-	function makeWhereZip( lat, lng ){
+	function makeWhere( lat, lng ){
 		return '<div lat="'+lat+'" lng="'+lng+'" class="where">'+
-					'<span class="title">Where I was:</span>'+
+					'<span class="title">Where I Was</span>'+
 					'<span class="location"></span>'+
 				'</div>';
 	}
@@ -483,6 +510,7 @@
 
 		this.popup = null;
 		this.under = null;
+		this.totalUnder = null;
 		this.time = 250;
 		this.picWidth = 260;  //used so no timeout needs to be set
 		this.next = null;
@@ -541,6 +569,7 @@
 			}
 		}
 
+		this.totalUnder = $('<div />').addClass('totalUnder').prependTo('body');
 
 		that.setContent = function( block ){
 			this.content.html( block );
@@ -555,6 +584,8 @@
 			});
 			if( this.under )
 				this.under.hide( 0 );
+				
+			this.totalUnder.hide( 0 );
 			return this;
 		}
 
@@ -641,6 +672,8 @@
 			if( this.under )
 				this.under.show( 0 );
 
+			this.totalUnder.show( 0 );
+			
 			this.reverseGeocode();
 
 			return this;
